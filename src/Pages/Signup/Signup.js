@@ -1,6 +1,9 @@
-import React from "react";
+import { updateProfile } from "firebase/auth";
+import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../../Contexts/AuthProvider";
 
 const Signup = () => {
   const {
@@ -8,9 +11,32 @@ const Signup = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const { createUser, updateUser, googleLogin } = useContext(AuthContext);
 
   const handleSignup = (data) => {
     console.log(data);
+    createUser(data.email, data.password)
+      .then((result) => {
+        const user = result.user;
+        console.log(user);
+        toast("User created successfully");
+        const profile = {
+          displayName: data.name,
+        };
+        updateUser(profile)
+          .then(() => {})
+          .catch(() => {});
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const handleGoogleLogin = () => {
+    googleLogin()
+      .then((result) => {
+        const user = result.user;
+        console.log(user);
+      })
+      .catch((err) => console.log(err));
   };
   return (
     <div className="flex h-screen justify-center items-center">
@@ -70,7 +96,9 @@ const Signup = () => {
           </Link>
         </p>
         <div className="divider">OR</div>
-        <button className="btn btn-outline w-full">CONTINUE WITH GOOGLE</button>
+        <button onClick={handleGoogleLogin} className="btn btn-outline w-full">
+          CONTINUE WITH GOOGLE
+        </button>
       </div>
     </div>
   );

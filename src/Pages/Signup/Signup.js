@@ -1,8 +1,7 @@
-import { updateProfile } from "firebase/auth";
 import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../Contexts/AuthProvider";
 
 const Signup = () => {
@@ -12,19 +11,21 @@ const Signup = () => {
     formState: { errors },
   } = useForm();
   const { createUser, updateUser, googleLogin } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleSignup = (data) => {
-    console.log(data);
     createUser(data.email, data.password)
       .then((result) => {
         const user = result.user;
-        console.log(user);
+
         toast("User created successfully");
         const profile = {
           displayName: data.name,
         };
         updateUser(profile)
-          .then(() => {})
+          .then(() => {
+            saveUser(data.name, data.email);
+          })
           .catch(() => {});
       })
       .catch((err) => console.log(err));
@@ -37,6 +38,21 @@ const Signup = () => {
         console.log(user);
       })
       .catch((err) => console.log(err));
+  };
+
+  const saveUser = (name, email) => {
+    const user = { name, email };
+    fetch(`http://localhost:5000/users`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(user),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        navigate("/");
+      });
   };
   return (
     <div className="flex h-screen justify-center items-center">

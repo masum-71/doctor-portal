@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import DashboardLayout from "../../Layout/DashboardLayout/DashboardLayout";
 import Main from "../../Layout/Main.js/Main";
 import Appointment from "../../Pages/Appointment/Appointment";
+import AddDoctors from "../../Pages/DashBoard/AddDoctors/AddDoctors";
 import AllUsers from "../../Pages/DashBoard/AllUsers/AllUsers";
 import DashBoard from "../../Pages/DashBoard/DashBoard/DashBoard";
 import Home from "../../Pages/Home/Home/Home";
@@ -50,6 +51,14 @@ export const router = createBrowserRouter([
         element: (
           <AdminRoute>
             <AllUsers></AllUsers>
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "/dashboard/adddoctors",
+        element: (
+          <AdminRoute>
+            <AddDoctors></AddDoctors>
           </AdminRoute>
         ),
       },

@@ -4,16 +4,21 @@ import { AuthContext } from "../../../Contexts/AuthProvider";
 
 const DashBoard = () => {
   const { user } = useContext(AuthContext);
+  const url = `http://localhost:5000/bookings?email=${user?.email}`;
+
   const { data: bookings = [] } = useQuery({
-    queryKey: ["booking", user?.email],
+    queryKey: ["bookings", user?.email],
     queryFn: async () => {
-      const res = await fetch(
-        `http://localhost:5000/bookings?email=${user?.email}`
-      );
+      const res = await fetch(url, {
+        headers: {
+          authorization: `bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       const data = await res.json();
       return data;
     },
   });
+
   return (
     <div>
       <h3 className="mb-4">My Appointment</h3>
@@ -29,7 +34,7 @@ const DashBoard = () => {
             </tr>
           </thead>
           <tbody>
-            {bookings.map((booking, i) => (
+            {bookings?.map((booking, i) => (
               <tr key={booking._id}>
                 <th>{i + 1}</th>
                 <td>{booking.patient}</td>

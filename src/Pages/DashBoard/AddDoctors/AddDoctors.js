@@ -1,14 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import Loading from "../../../Shared/Loading/Loading";
 
 const AddDoctors = () => {
+  const imageHostKey = process.env.REACT_APP_IMAGEBB_KEY;
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
+
+  const navigate = useNavigate();
 
   const { data: specialty = [], isLoading } = useQuery({
     queryKey: ["specialty"],
@@ -23,7 +29,39 @@ const AddDoctors = () => {
     return <Loading></Loading>;
   }
   const handleAddDoctor = (data) => {
-    console.log(data);
+    const image = data.image[0];
+    const formData = new FormData();
+    formData.append("image", image);
+    const url = `https://api.imgbb.com/1/upload?key=${imageHostKey}`;
+
+    fetch(url, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((imgData) => {
+        const doctor = {
+          name: data.name,
+          email: data.email,
+          specialty: data.specialty,
+          photo: imgData.data.url,
+        };
+
+        fetch(`http://localhost:5000/doctors`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            authorization: `bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify(doctor),
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            console.log(result);
+            toast.success(`${data.name} is added successfully`);
+            navigate("/dashboard/managedoctors");
+          });
+      });
   };
   return (
     <div>
@@ -77,7 +115,7 @@ const AddDoctors = () => {
             <input
               type="file"
               className="input input-bordered w-full "
-              {...register("img", { required: "image is required" })}
+              {...register("image", { required: "image is required" })}
             />
             {errors.img && (
               <p className="text-red-500 text-center mt-3">
